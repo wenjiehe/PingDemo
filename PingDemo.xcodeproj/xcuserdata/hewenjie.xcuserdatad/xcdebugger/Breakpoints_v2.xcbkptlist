@@ -14,8 +14,8 @@
             filePath = "PingDemo/ViewController.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
+            startingLineNumber = "97"
+            endingLineNumber = "97"
             landmarkName = "-showError:"
             landmarkType = "7">
          </BreakpointContent>

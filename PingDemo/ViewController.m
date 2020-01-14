@@ -10,10 +10,16 @@
 #import "SimplePing.h"
 #include <netdb.h>
 
+
+//以ping操作进行判断网络真实连接状态
 @interface ViewController ()<SimplePingDelegate>
 
 @property(nonatomic,strong)SimplePing *ping;
 @property(nonatomic)dispatch_source_t timer;
+
+@property(nonatomic)__block NSTimeInterval startTime; /**< 开始发送数据的时间 */
+@property(nonatomic)NSTimeInterval delayTime; /**< 消耗的时间 */
+@property(nonatomic,copy)NSString *ip; /**<  ip地址 */
 
 @end
 
@@ -35,8 +41,10 @@
     _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
     dispatch_source_set_timer(_timer, dispatch_time(DISPATCH_TIME_NOW, 0), 1 * NSEC_PER_SEC, 5 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(_timer, ^{
+        _startTime = CFAbsoluteTimeGetCurrent();
         //发送数据进行监测
         [self.ping sendPingWithData:nil];
+        
     });
     //启动定时器
     dispatch_resume(_timer);
@@ -44,7 +52,7 @@
 
 - (void)start:(BOOL)forceIPv4 forceIPv6:(BOOL)forceIPv6
 {
-    self.ping = [[SimplePing alloc] initWithHostName:@"www.apple.com"];
+    self.ping = [[SimplePing alloc] initWithHostName:@"www.baidu.com"];
     
     if (forceIPv4 && !forceIPv6) {
         self.ping.addressStyle = SimplePingAddressStyleICMPv4;
@@ -66,6 +74,7 @@
     dispatch_suspend(_timer);
     //取消定时器
     dispatch_source_cancel(_timer);
+    self.ip = @"";
 }
 
 - (void)displayAddress:(NSData *)address
@@ -75,7 +84,8 @@
     NSAssert(address != nil, @"address is nil");
     int i = getnameinfo([address bytes], (socklen_t)[address length], hostStr, sizeof(hostStr), NULL, 0, NI_NUMERICHOST);
     if (i == 0) {
-        NSLog(@"result = %@", [NSString stringWithCString:hostStr encoding:NSUTF8StringEncoding]);
+        self.ip = [NSString stringWithCString:hostStr encoding:NSUTF8StringEncoding];
+        NSLog(@"result = %@", self.ip);
     }
 }
 
@@ -116,7 +126,11 @@
 /// @param sequenceNumber ICMP序列号
 - (void)simplePing:(SimplePing *)pinger didSendPacket:(NSData *)packet sequenceNumber:(uint16_t)sequenceNumber
 {
-    NSLog(@"#%u sent", sequenceNumber);
+//    NSLog(@"#%u sent", sequenceNumber);
+    _delayTime = (CFAbsoluteTimeGetCurrent() - _startTime) * 1000;
+    //ip=ip地址,received=序列号,size=响应数据包的大小为64字节,time=请求往返耗时
+    NSLog(@"ip = %@， #%u received， size = %zu，time = %fms", self.ip, sequenceNumber, packet.length, _delayTime);
+
 }
 
 /// 发送数据包失败时调用
@@ -137,9 +151,12 @@
 /// @param sequenceNumber 数据包中的ICMP序列号
 - (void)simplePing:(SimplePing *)pinger didReceivePingResponsePacket:(NSData *)packet sequenceNumber:(uint16_t)sequenceNumber
 {
-    NSLog(@"%s #%u", __FUNCTION__, sequenceNumber);
+    _delayTime = (CFAbsoluteTimeGetCurrent() - _startTime) * 1000;
+    //ip地址,
+    NSLog(@"ip = %@， #%u received， size = %zu，time = %f", self.ip, sequenceNumber, packet.length, _delayTime);
 }
 
+//收到未知的数据包
 - (void)simplePing:(SimplePing *)pinger didReceiveUnexpectedPacket:(NSData *)packet
 {
     NSLog(@"%s", __FUNCTION__);
