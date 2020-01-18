@@ -130,7 +130,9 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
     NSParameterAssert(hostName != nil);
     self = [super init];
     if (self != nil) {
+        //记录下域名或ip地址
         self->_hostName   = [hostName copy];
+        //随机建议一个标识符
         self->_identifier = (uint16_t) arc4random();
     }
     return self;
