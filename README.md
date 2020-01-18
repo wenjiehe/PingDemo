@@ -15,7 +15,7 @@
 
 ## 如何使用SimplePing
 
-
+![SimplePing使用流程](https://github.com/wenjiehe/PingDemo/blob/master/PingDemo/simplePing使用流程.png)
 
 ## 终端
 
@@ -35,6 +35,9 @@
   [CFNetWork框架详解](https://www.jianshu.com/p/e9d29d142a5c)
   
   [CFSocket](https://www.jianshu.com/p/9353105a9129)
+  
   [ICMP](https://baike.baidu.com/item/ICMP/572452)
+  
   [Ping](https://baike.baidu.com/item/ping/6235?fr=aladdin)
+  
   [SimplePing源码详解](https://dongqihouse.github.io/2018/09/11/ping/)
